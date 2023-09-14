@@ -155,7 +155,6 @@ import createIcon from "../../assets/icon/create.svg";
 import { ref, onMounted, computed } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { watch } from "vue";
 
 const store = useStore();
 const router = useRouter();
@@ -163,7 +162,6 @@ const products = computed(() => store.getters["product/allProducts"].data);
 const page = ref(1);
 const itemsPerPage = ref(10);
 const deleteDialog = ref(false);
-const confirmDelete = ref(false);
 const product_delete_id = ref(0);
 const product_delete_index = ref(0);
 const headers = [
