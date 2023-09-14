@@ -48,6 +48,10 @@
           {{ (page - 1) * itemsPerPage + index + 1 }}
         </template>
 
+        <template v-slot:item.addon_price_thb="{ item }">
+          <span> ฿{{ item.columns.addon_price_thb.toLocaleString() }} </span>
+        </template>
+
         <template v-slot:item.active="{ item }">
           <v-switch
             v-model="item.columns.active"
@@ -56,16 +60,9 @@
           ></v-switch>
         </template>
 
-        <template v-slot:item.actions="{ item }">
+        <template v-slot:item.actions="{}">
           <v-row class="ml-0 text-center">
-            <v-icon
-              icon="mdi-pencil-outline"
-              variant="text"
-              size="small"
-              @click="
-                edit(item.columns.product_id) // <--- here
-              "
-            >
+            <v-icon icon="mdi-pencil-outline" variant="text" size="small">
             </v-icon>
             <v-icon size="small" @click=""> mdi-delete-outline </v-icon>
           </v-row>
@@ -94,26 +91,6 @@
           </v-row>
         </template>
       </v-data-table>
-
-      <v-dialog v-model="deleteDialog" max-width="300">
-        <v-card>
-          <v-card-text>Are you sure you want to delete?</v-card-text>
-          <v-card-actions>
-            <v-btn
-              color="green darken-1"
-              variant="text"
-              @click="deleteDialog = false"
-              >Cancel</v-btn
-            >
-            <v-btn
-              color="red darken-1"
-              variant="text"
-              @click="confirmDelete = true"
-              >Delete</v-btn
-            >
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
     </v-col>
   </v-row>
 </template>
@@ -122,22 +99,17 @@
 import createIcon from "../../assets/icon/create.svg";
 import { ref, onMounted, computed } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-// import { watch } from "vue";
 
 const store = useStore();
-const router = useRouter();
 const addon = computed(() => store.getters["product/getAddonList"].data);
 const page = ref(1);
 const itemsPerPage = ref(10);
-const deleteDialog = ref(false);
-const confirmDelete = ref(false);
 
 const headers = [
   { title: "No.", key: "index", sortable: false },
   { title: "ADD-ON ID", key: "addon_id", sortable: false },
   { title: "ADD-ON Name", key: "addon_name_en", sortable: false },
-  { title: "Total Price", key: "addon_total_price", sortable: false },
+  { title: "Total Price", key: "addon_price_thb", sortable: false },
   { title: "Active", key: "active", sortable: false },
   { title: "Action", key: "actions", sortable: false },
 ];
@@ -164,11 +136,6 @@ onMounted(async () => {
     console.error("Error fetching addon:", error);
   }
 });
-
-const edit = (id: number) => {
-  console.log("Edit product id:", id);
-  router.push({ name: "editProduct", params: { id: id } });
-};
 </script>
 
 <style scoped>

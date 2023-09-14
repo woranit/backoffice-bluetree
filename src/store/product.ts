@@ -9,6 +9,7 @@ interface Product {
   product_child_price: number;
   product_total_price: number;
   product_addon: number;
+  product_status: number;
 }
 
 //describe the object as an array of Product
@@ -159,6 +160,20 @@ const actions = {
       });
   },
 
+  async updateProduct(context: any, payload: any) {
+    console.log(payload);
+    let url = `api/blue_tree/bof/update_product_backoffice/${payload.id}`;
+    console.log(url);
+    return apiClient
+      .put(url, payload.dataForm)
+      .then((res) => {
+        return true;
+      })
+      .catch((error) => {
+        return false;
+      });
+  },
+
   async deleteProduct(context: any, data: string) {
     let url = `api/blue_tree/bof/delete_product_backoffice/${data}`;
     return apiClient
@@ -168,6 +183,19 @@ const actions = {
       })
       .catch((res) => {
         return false;
+      });
+  },
+
+  async updateStatus(context: any, data: string) {
+    let url = `api/blue_tree/bof/update_status_product_backoffice/${data}`;
+    console.log(url);
+    await apiClient
+      .put(url)
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((error) => {
+        console.error("An error occurred:", error);
       });
   },
 

@@ -908,21 +908,6 @@ const openImagePicker = () => {
   fileInput.value?.click();
 };
 
-// const handleFileUpload = (event: Event) => {
-//   const input = event.target as HTMLInputElement;
-//   const file = input.files?.[0];
-//   if (file) {
-//     selectedFile.value = file; // Store the File object
-//     console.log("Got a file through file picker.", file); // Log the file
-//     const reader = new FileReader();
-//     reader.readAsDataURL(file);
-//     reader.onloadend = () => {
-//       imageSrc.value = reader.result as string;
-//       single_img_valid.value = false;
-//     };
-//   }
-// };
-
 const handleFileUpload = (event: Event) => {
   let file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
@@ -934,35 +919,7 @@ const handleFileUpload = (event: Event) => {
       single_img_valid.value = false;
     };
   }
-  // let file =
-  //   (event.target as HTMLInputElement).files || event.dataTransfer.files;
-  // let img = file[0];
-  // const reader = new FileReader();
-  // reader.readAsDataURL(img);
-  // reader.onload = () => {
-  //   const base64EncodedImage = reader.result;
-  //   console.log(base64EncodedImage);
-  // };
 };
-
-// let files = event.target.files || event.dataTransfer.files;
-//         name_type.value.push(files[0].type.substr(-3));
-//         store.commit("dashboard/pushIndex", files);
-//         let img = files[0];
-//         const reader = new FileReader();
-//         reader.readAsDataURL(img);
-//         reader.onload = () => {
-//           const base64EncodedImage = reader.result;
-//           let body = {
-//             pdf_name: "bookbank",
-//             pdf_file: base64EncodedImage,
-//           };
-//           imagesName.value.push(files[0].name);
-//           let res = store.dispatch("dashboard/upload_singlefile", body);
-//           if (res == false) {
-//             alert("Can't upload files");
-//           }
-//         };
 
 const handleDrop = (event: DragEvent) => {
   event.preventDefault();

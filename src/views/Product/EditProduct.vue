@@ -15,7 +15,9 @@
   <v-row>
     <v-col>
       <v-card class="elevation-3">
-        <v-card v-if="fetching"> LOADING... </v-card>
+        <v-card v-if="fetching" :loading="true">
+          <v-card-item> fetching data... </v-card-item>
+        </v-card>
         <v-form ref="form" v-else>
           <v-card-title style="font-size: 16px; font-weight: 700">
             <v-btn to="/dashboard/product/list" icon variant="text">
@@ -24,7 +26,7 @@
               >
             </v-btn>
             <span>
-              {{ product.product_name_en }}
+              {{ name_eng }}
             </span>
           </v-card-title>
           <v-divider></v-divider>
@@ -839,21 +841,23 @@ import createIcon from "../../assets/icon/create.svg";
 import { ref, watch, computed, onMounted } from "vue";
 import moment from "moment";
 import { useStore } from "vuex";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const store = useStore();
 const form = ref(false);
 const route = useRoute();
-// const router = useRouter();
+const router = useRouter();
 const id = ref(route.params.id);
 const loading_btn = ref<boolean>(false);
 const fetching = ref<boolean>(true);
+const catList = ref<any>([]);
 
 onMounted(async () => {
   await store.dispatch("product/getProduct_detail", id.value);
   await store.dispatch("product/fetchAddon");
   const Category = await store.dispatch("product/fetchCategory");
-
+  catList.value = Category;
+  name_eng.value = product.value.product_name_en;
   fetching.value = false;
   console.log(
     "Products from store:",
@@ -868,7 +872,11 @@ onMounted(async () => {
   format.value = moment(product.value.product_expired_date).format(
     "DD-MM-YYYY"
   );
-  date_amount.value = product.value.product_expried_in;
+  date_amount.value =
+    product.value.product_expried_in == null
+      ? 0
+      : product.value.product_expried_in;
+
   if (product.value.product_seperate_adult_child == 1) {
     open_switch.value.push(1);
   }
@@ -981,8 +989,7 @@ const imagePreviews = ref<{ src: string; name: string }[]>([]);
 const dialog = ref(false);
 
 // name
-// const name_th = ref<string>("");
-// const name_eng = ref<string>("");
+const name_eng = ref<string>("");
 
 //channel
 const selected = ref<string[]>([]);
@@ -1001,22 +1008,6 @@ const date_amount = ref<number | null>(0);
 
 // price
 const open_switch = ref<Number[]>([]);
-// const std_price_thb = ref<Number>(0);
-// const std_price_usd = ref<Number>(0);
-// const std_adult_price_thb = ref<Number>(0);
-// const std_adult_price_usd = ref<Number>(0);
-// const std_child_price_thb = ref<Number>(0);
-// const std_child_price_usd = ref<Number>(0);
-// const sale_price_thb = ref<Number>(0);
-// const sale_price_usd = ref<Number>(0);
-// const sale_adult_price_thb = ref<Number>(0);
-// const sale_adult_price_usd = ref<Number>(0);
-// const sale_child_price_thb = ref<Number>(0);
-// const sale_child_price_usd = ref<Number>(0);
-// description
-// const description_th = ref<string>("");
-// const description_eng = ref<string>("");
-// const id = ref(route.params.id);
 
 //validation
 const err_msg_checkbox = ref<string>("");
@@ -1256,125 +1247,159 @@ const update_product = async () => {
     err_category.value == false &&
     err_addon.value == false
   ) {
-    //   console.log("pass");
-    //   const exp_type = ref(0);
-    //   if (selected_exp_type.value == "Specific Date") {
-    //     exp_type.value = 1;
-    //     format.value = moment(date.value).format("YYYY-MM-DD");
-    //   } else {
-    //     exp_type.value = 2;
-    //     format.value = null;
-    //   }
-    //   const adult_child = ref(0);
-    //   const sale_price = ref(0);
-    //   if (open_switch.value.includes(1)) {
-    //     adult_child.value = 1;
-    //   }
-    //   if (open_switch.value.includes(2)) {
-    //     sale_price.value = 1;
-    //   }
-    //   const product_image = ref<unknown[]>([]);
-    //   imagePreviews.value.forEach((item, index) => {
-    //     let data = {
-    //       product_image_id: index + 1,
-    //       product_image_image: item.src,
-    //     };
-    //     product_image.value.push(data);
-    //   });
-    //   product_channel.value = [];
-    //   selected.value.forEach((item, index) => {
-    //     let data = {
-    //       channel_id: index + 1,
-    //       channel_name_en: item,
-    //     };
-    //     product_channel.value.push(data);
-    //   });
-    //   const product_category = ref<unknown[]>([]);
-    //   checkedItems.value.forEach((item, index) => {
-    //     let data = {
-    //       category_id: index + 1,
-    //       category_name_en: item,
-    //     };
-    //     product_category.value.push(data);
-    //   });
-    //   const product_addon = ref<unknown[]>([]);
-    //   selectedItems.value.forEach((item, index) => {
-    //     let data = {
-    //       addon_id: index + 1,
-    //       addon_name_en: item,
-    //     };
-    //     product_addon.value.push(data);
-    //   });
-    // let data = {
-    //   product: {
-    //     product_name_th: name_th.value,
-    //     product_name_en: name_eng.value,
-    //     product_description_th: description_th.value,
-    //     product_description_en: description_eng.value,
-    //     product_expired_type: exp_type.value,
-    //     product_expired_date: format.value,
-    //     product_expried_in:
-    //       date_amount.value == 0 ? null : Number(date_amount.value),
-    //     product_alotment: 1,
-    //     product_seperate_adult_child: adult_child.value,
-    //     product_have_sale_price: sale_price.value,
-    //     product_standard_price_thb:
-    //       std_price_thb.value == 0 ? null : Number(std_price_thb.value),
-    //     product_standard_price_usd:
-    //       std_price_usd.value == 0 ? null : Number(std_price_usd.value),
-    //     product_standard_adult_price_thb:
-    //       std_adult_price_thb.value == 0
-    //         ? null
-    //         : Number(std_adult_price_thb.value),
-    //     product_standard_adult_price_usd:
-    //       std_adult_price_usd.value == 0
-    //         ? null
-    //         : Number(std_adult_price_usd.value),
-    //     product_standard_child_price_thb:
-    //       std_child_price_thb.value == 0
-    //         ? null
-    //         : Number(std_child_price_thb.value),
-    //     product_standard_child_price_usd:
-    //       std_child_price_usd.value == 0
-    //         ? null
-    //         : Number(std_child_price_usd.value),
-    //     product_sale_price_thb:
-    //       sale_price_thb.value == 0 ? null : Number(sale_price_thb.value),
-    //     product_sale_price_usd:
-    //       sale_price_usd.value == 0 ? null : Number(sale_price_usd.value),
-    //     product_adult_sale_price_thb:
-    //       sale_adult_price_thb.value == 0
-    //         ? null
-    //         : Number(sale_adult_price_thb.value),
-    //     product_adult_sale_price_usd:
-    //       sale_adult_price_usd.value == 0
-    //         ? null
-    //         : Number(sale_adult_price_usd.value),
-    //     product_child_sale_price_thb:
-    //       sale_child_price_thb.value == 0
-    //         ? null
-    //         : Number(sale_child_price_thb.value),
-    //     product_child_sale_price_usd:
-    //       sale_child_price_usd.value == 0
-    //         ? null
-    //         : Number(sale_child_price_usd.value),
-    //     product_profile_image: imageSrc.value,
-    //   },
-    //   product_image: product_image.value,
-    //   product_channel: product_channel.value,
-    //   product_category: product_category.value,
-    //   product_addon: product_addon.value,
-    // };
-    // loading_btn.value = true;
-    // let response = await store.dispatch("product/createProducts", data);
-    // if (response == false) {
-    //   alert("cannot create product");
-    //   loading_btn.value = false;
-    //   return;
-    // }
-    // loading_btn.value = false;
-    // router.push({ path: "/dashboard/product/list" });
-    // console.log(data);
+    console.log("pass");
+
+    const exp_type = ref(0);
+    const expired_date = ref<string | null>(null);
+
+    if (selected_exp_type.value == "Specific Date") {
+      exp_type.value = 1;
+      if (date.value == "") {
+        expired_date.value = moment(product.value.product_expired_date).format(
+          "YYYY-MM-DDTHH:mm:ss[Z]"
+        );
+      } else {
+        expired_date.value = moment(date.value).format(
+          "YYYY-MM-DDTHH:mm:ss[Z]"
+        );
+      }
+    } else {
+      exp_type.value = 2;
+      expired_date.value = null;
+    }
+
+    const product_image = ref<unknown[]>([]);
+    imagePreviews.value.forEach((item) => {
+      if (item.src.substring(0, 5) == "https") {
+        let data = {
+          product_image_id: item.name,
+          product_image_image: item.src,
+        };
+        product_image.value.push(data);
+      } else {
+        let data = {
+          product_image_image: item.src,
+        };
+        product_image.value.push(data);
+      }
+    });
+
+    console.log("Addon List", addOnList.value.data);
+    const product_addon = ref<unknown[]>([]);
+    selectedItems.value.forEach((item) => {
+      addOnList.value.data.forEach((i: { addon_id: number }) => {
+        if (item.value == i.addon_id) {
+          product_addon.value.push(i);
+        }
+      });
+    });
+
+    const product_category = ref<unknown[]>([]);
+    checkedItems.value.forEach((item) => {
+      catList.value.forEach((i: { category_id: number }) => {
+        if (item.value == i.category_id) {
+          product_category.value.push(i);
+        }
+      });
+    });
+
+    const product_channel = ref<unknown[]>([]);
+
+    selected.value.forEach((item) => {
+      if (item == "Booking") {
+        let data = {
+          channel_id: 1,
+          channel_name: item,
+        };
+        product_channel.value.push(data);
+      } else if (item == "Package") {
+        let data = {
+          channel_id: 2,
+          channel_name: item,
+        };
+        product_channel.value.push(data);
+      } else if (item == "Member") {
+        let data = {
+          channel_id: 3,
+          channel_name: item,
+        };
+        product_channel.value.push(data);
+      } else if (item == "Create Order") {
+        let data = {
+          channel_id: 4,
+          channel_name: item,
+        };
+        product_channel.value.push(data);
+      }
+    });
+
+    let data = {
+      product: {
+        // product_id: Number(id.value),
+        product_code: null,
+        product_name_th: product.value.product_name_th,
+        product_name_en: product.value.product_name_en,
+        product_description_th: product.value.product_description_th,
+        product_description_en: product.value.product_description_en,
+        product_expired_type: exp_type.value,
+        product_expired_date: expired_date.value,
+        product_expried_in:
+          date_amount.value == 0 ? null : Number(date_amount.value),
+        product_alotment: 1,
+        product_seperate_adult_child: open_switch.value.includes(1) ? 1 : 0,
+        product_have_sale_price: open_switch.value.includes(2) ? 1 : 0,
+        product_standard_price_thb:
+          product.value.product_standard_price_thb == 0
+            ? null
+            : Number(product.value.product_standard_price_thb),
+        product_standard_price_usd: null,
+        product_standard_adult_price_thb:
+          product.value.product_standard_adult_price_thb == 0
+            ? null
+            : Number(product.value.product_standard_adult_price_thb),
+        product_standard_adult_price_usd: null,
+        product_standard_child_price_thb:
+          product.value.product_standard_child_price_thb == 0
+            ? null
+            : Number(product.value.product_standard_child_price_thb),
+        product_standard_child_price_usd: null,
+        product_sale_price_thb:
+          product.value.product_sale_price_thb == 0
+            ? null
+            : Number(product.value.product_sale_price_thb),
+        product_sale_price_usd: null,
+        product_adult_sale_price_thb:
+          product.value.product_adult_sale_price_thb == 0
+            ? null
+            : Number(product.value.product_adult_sale_price_thb),
+        product_adult_sale_price_usd: null,
+        product_child_sale_price_thb: product.value.product_child_sale_price_thb
+          ? null
+          : Number(product.value.product_child_sale_price_thb),
+        product_child_sale_price_usd: null,
+        product_profile_image: imageSrc.value,
+        product_status: product.value.product_status,
+      },
+      product_image: product_image.value,
+      product_addon: product_addon.value,
+      product_category: product_category.value,
+      product_channel: product_channel.value,
+    };
+    console.log(data);
+    loading_btn.value = true;
+    // console.log("id", id.value);
+    let payload = {
+      dataForm: data,
+      id: id.value,
+    };
+    let response = await store.dispatch("product/updateProduct", payload);
+    if (response == false) {
+      alert("cannot update product");
+      loading_btn.value = false;
+      return;
+    }
+    loading_btn.value = false;
+    router.push({ path: "/dashboard/product/list" });
   }
 };
 </script>

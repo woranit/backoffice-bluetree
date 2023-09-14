@@ -48,15 +48,45 @@
           {{ (page - 1) * itemsPerPage + index + 1 }}
         </template>
 
-        <template v-slot:item.active="{ item }">
+        <template v-slot:item.product_adult_price="{ item }">
+          <span v-if="item.columns.product_adult_price === 0">-</span>
+          <span v-else
+            >฿{{ item.columns.product_adult_price.toLocaleString() }}</span
+          >
+        </template>
+
+        <template v-slot:item.product_child_price="{ item }">
+          <span v-if="item.columns.product_child_price === 0">-</span>
+          <span v-else
+            >฿{{ item.columns.product_child_price.toLocaleString() }}</span
+          >
+        </template>
+
+        <template v-slot:item.product_total_price="{ item }">
+          <span v-if="item.columns.product_total_price === 0">-</span>
+          <span v-else
+            >฿{{ item.columns.product_total_price.toLocaleString() }}</span
+          >
+        </template>
+
+        <!-- Active -->
+        <template v-slot:item.product_status="{ item }">
           <v-switch
-            v-model="item.columns.active"
+            v-model="item.columns.product_status"
+            @change="isActive(item.columns.product_id)"
             color="#D9633C"
-            density="compact"
+            :true-value="1"
+            :false-value="0"
           ></v-switch>
         </template>
 
-        <template v-slot:item.actions="{ item }">
+        <template v-slot:item.product_addon="{ item }">
+          <span style="text-align: center; display: block; width: 50%">
+            {{ item.columns.product_addon }}
+          </span>
+        </template>
+
+        <template v-slot:item.actions="{ item, index }">
           <v-row class="ml-0 text-center">
             <v-icon
               icon="mdi-pencil-outline"
@@ -69,7 +99,7 @@
             </v-icon>
             <v-icon
               size="small"
-              @click="deleteProduct(item.columns.product_id)"
+              @click="open_delete_dialog(item.columns.product_id, index)"
             >
               mdi-delete-outline
             </v-icon>
@@ -110,10 +140,7 @@
               @click="deleteDialog = false"
               >Cancel</v-btn
             >
-            <v-btn
-              color="red darken-1"
-              variant="text"
-              @click="confirmDelete = true"
+            <v-btn color="red darken-1" variant="text" @click="deleteProduct()"
               >Delete</v-btn
             >
           </v-card-actions>
@@ -137,7 +164,8 @@ const page = ref(1);
 const itemsPerPage = ref(10);
 const deleteDialog = ref(false);
 const confirmDelete = ref(false);
-
+const product_delete_id = ref(0);
+const product_delete_index = ref(0);
 const headers = [
   { title: "No.", key: "index", sortable: false },
   { title: "Product ID", key: "product_id", sortable: false },
@@ -146,13 +174,12 @@ const headers = [
   { title: "Child Price", key: "product_child_price", sortable: false },
   { title: "Total Price", key: "product_total_price", sortable: false },
   { title: "Add-On", key: "product_addon", sortable: false },
-  { title: "Active", key: "active", sortable: false },
+  { title: "Active", key: "product_status", sortable: false },
   { title: "Action", key: "actions", sortable: false },
 ];
 
-const filterProducts = ref([]);
+const filterProducts = ref<any[]>([]);
 const search = ref("");
-
 const searchProduct = () => {
   filterProducts.value = products.value.filter((product: any) => {
     return (
@@ -164,38 +191,66 @@ const searchProduct = () => {
   });
 };
 
-const deleteProduct = async (id: number) => {
+// const deleteProduct = async (id: number) => {
+//   deleteDialog.value = true;
+//   // console.log("Delete product id:", id);
+//   watch(confirmDelete, async (value) => {
+//     if (value === true) {
+//       try {
+//         await store.dispatch("product/deleteProduct", String(id));
+//         filterProducts.value = filterProducts.value.filter(
+//           (product: any) => product.product_id !== id
+//         );
+//       } catch (error) {
+//         console.error("Error deleting product:", error);
+//       } finally {
+//         deleteDialog.value = false;
+//         confirmDelete.value = false;
+//       }
+//     } else {
+//       confirmDelete.value = false;
+//     }
+//   });
+// };
+const open_delete_dialog = (id: number) => {
+  let id_id: any = products.value.findIndex(
+    (element: any) => element.product_id == id
+  );
+  product_delete_id.value = id;
+  product_delete_index.value = id_id;
   deleteDialog.value = true;
-  // console.log("Delete product id:", id);
-  watch(confirmDelete, async (value) => {
-    if (value === true) {
-      try {
-        await store.dispatch("product/deleteProduct", String(id));
-        filterProducts.value = filterProducts.value.filter(
-          (product: any) => product.product_id !== id
-        );
-      } catch (error) {
-        console.error("Error deleting product:", error);
-      } finally {
-        deleteDialog.value = false;
-        confirmDelete.value = false;
-      }
-    } else {
-      confirmDelete.value = false;
-    }
-  });
+};
+const deleteProduct = async () => {
+  let res = await store.dispatch(
+    "product/deleteProduct",
+    String(product_delete_id.value)
+  );
+  if (res == false) {
+    alert("cannot delete product");
+    deleteDialog.value = false;
+    return;
+  }
+  products.value.splice(product_delete_index.value, 1);
+  deleteDialog.value = false;
 };
 
 onMounted(async () => {
   try {
     await store.dispatch("product/fetchProducts");
-    console.log("Products from store:", products.value);
     filterProducts.value = products.value;
-    console.log("Search Products:", filterProducts.value);
+    console.log("Products:", products.value);
   } catch (error) {
     console.error("Error fetching products:", error);
   }
 });
+
+const isActive = async (id: number) => {
+  try {
+    await store.dispatch("product/updateStatus", String(id));
+  } catch (error) {
+    console.error("Error updating product status:", error);
+  }
+};
 
 const edit = (id: number) => {
   console.log("Edit product id:", id);
