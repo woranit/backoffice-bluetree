@@ -189,27 +189,6 @@ const searchProduct = () => {
   });
 };
 
-// const deleteProduct = async (id: number) => {
-//   deleteDialog.value = true;
-//   // console.log("Delete product id:", id);
-//   watch(confirmDelete, async (value) => {
-//     if (value === true) {
-//       try {
-//         await store.dispatch("product/deleteProduct", String(id));
-//         filterProducts.value = filterProducts.value.filter(
-//           (product: any) => product.product_id !== id
-//         );
-//       } catch (error) {
-//         console.error("Error deleting product:", error);
-//       } finally {
-//         deleteDialog.value = false;
-//         confirmDelete.value = false;
-//       }
-//     } else {
-//       confirmDelete.value = false;
-//     }
-//   });
-// };
 const open_delete_dialog = (id: number) => {
   let id_id: any = products.value.findIndex(
     (element: any) => element.product_id == id
@@ -218,6 +197,7 @@ const open_delete_dialog = (id: number) => {
   product_delete_index.value = id_id;
   deleteDialog.value = true;
 };
+
 const deleteProduct = async () => {
   let res = await store.dispatch(
     "product/deleteProduct",

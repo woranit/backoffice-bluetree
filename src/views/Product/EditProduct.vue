@@ -54,16 +54,6 @@
                     height="300"
                     v-bind="props"
                   >
-                    <!-- <div v-if="!imageSrc" class="image-icon-text">
-                      <img
-                        src="../../assets/icon/image.svg"
-                        alt="Image Icon"
-                        width="130"
-                      />
-                      <div class="title" style="padding-top: 20px">
-                        Insert or drag Image
-                      </div>
-                    </div> -->
                     <img
                       :style="{
                         opacity: isHovering ? '0.3' : '1',
